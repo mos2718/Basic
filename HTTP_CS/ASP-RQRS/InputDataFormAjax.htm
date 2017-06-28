@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+
+<head>
+
+<title>Input Data</title>
+
+<script type="text/javascript" src="AjaxCallBack.js"></script>
+<script type="text/javascript">
+function Button1_onclick() {
+   
+var thisform =document.forms[0];
+	var form_len = thisform.length;
+	var out_string = '<Root>';
+	out_string += '<ID>';
+	
+	out_string += document.getElementById("ID").value;
+	out_string +='</ID>';
+    out_string += '<Name>';
+	out_string += document.getElementById("Name").value;
+	out_string +='</Name>';
+	out_string += '<Data>';
+	var form_elem;
+	for (var i = 0 ; i < form_len ; i++) {
+			form_elem = thisform.elements[i];  
+			out_string += '<'+ form_elem.name + '>';
+			out_string += form_elem.value ;
+			out_string += '</'+ form_elem.name + '>';
+			}
+	 out_string += '</Data>';		
+     out_string += '</Root>';
+ 	
+	 alert(out_string);	
+	 
+     CallbackRequest(out_string, "SaveData.aspx")
+
+}
+
+function Button2_onclick() {
+
+	var out_string = '<Root>';
+	out_string += '<ID>';
+	out_string += document.getElementById("ID").value;
+	out_string +='</ID>';
+    out_string += '</Root>';
+    var in_string;
+    // 由 ID Callback 向 server 查詢先前儲存的資料
+    CallbackRequest(out_string, "LoadData.aspx")
+     
+     //將Callback 回傳之 RSRet 放到  XML DOM 物件當中
+     if (window.ActiveXObject)
+       		 {xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+          	  xmlDoc.async=false; 
+          	  xmlDoc.loadXML(RSRet);
+          	  	 }
+     else if  (document.implementation && document.implementation.createDocument)
+	       	{
+          	 xmlDoc = document.implementation.createDocument("","",null);
+        	 var parser=new DOMParser();
+              xmlDoc=parser.parseFromString(RSRet,"text/xml");	
+         	 }
+     else {alert("DOM error");}
+     
+    //  將取回的資料回填到表單當中 
+    var thisform =document.forms[0];
+	var form_len = thisform.length;
+	var form_elem;
+	for (var i = 0 ; i < form_len ; i++) {
+  		form_elem = thisform.elements[i];
+             
+  		objNode = xmlDoc.getElementsByTagName(form_elem.name);
+        if(objNode[0].hasChildNodes()) 
+                  {    form_elem.value = objNode[0].firstChild.nodeValue;  }
+		}
+     
+
+}
+
+</script>
+</head>
+
+<body>
+
+<form method="POST" action="AddData.aspx">
+
+	<p>　ID&nbsp;&nbsp;&nbsp;&nbsp;
+    
+    <input id="ID" type="text" name="ID" size="20" /><br />
+    <br />
+    Name<input id="Name" type="text"  name="Name" size="20" /></p>
+    <p>
+        Data&nbsp;
+
+    <input id="Data" type="text" name="Data" />
+    </p>
+	<input type="button" value="SaveData" name="B2" id="Button1" onclick="return Button1_onclick()"  />&nbsp;&nbsp;
+	<input type="button" value="LoadData" name="B3" id="Button2" onclick="return Button2_onclick()" />
+</form>
+
+</body>
+
+</html>
